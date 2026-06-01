@@ -170,8 +170,6 @@ Add project screenshots here.
 
 **Atul Pandey**
 
-Bachelor of Technology (B.Tech)
-Graphic Era Hill University
 
 ## License
 
