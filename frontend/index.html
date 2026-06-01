@@ -15,6 +15,7 @@
         rel="stylesheet">
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -40,12 +41,7 @@
 
         </nav>
 
-        <div class="sidebar-footer">
-            <nav class="nav-links">
-                <li><a href="#"><i class="fa-solid fa-circle-question"></i> <span>Support</span></a></li>
-                <li><a href="#"><i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span></a></li>
-            </nav>
-        </div>
+       
     </aside>
 
     <!-- Main Content -->
@@ -112,16 +108,8 @@
                     <div class="hero-text">
                         <h2>Finance Dashboard</h2>
                         <p>Track your income and expenses</p>
-                        <div class="time-filters" style="display: flex; gap: 10px; margin-top: 15px;">
-                            <span
-                                style="background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; cursor: pointer;">Daily</span>
-                            <span
-                                style="background: white; border: 1px solid var(--border-color); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; cursor: pointer;">Weekly</span>
-                            <span
-                                style="background: white; border: 1px solid var(--border-color); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; cursor: pointer;">Monthly</span>
-                        </div>
+                       
                     </div>
-                    <button class="btn-add"><i class="fa-solid fa-plus"></i> Add Transaction</button>
                 </div>
 
                 <div class="sub-stats" style="margin-bottom: 2rem;">
@@ -148,14 +136,14 @@
                 <!-- Distribution and lists -->
                 <div class="card">
                     <div class="card-header">
-                        <h3><i class="fa-solid fa-clock-rotate-left"></i> Expense Distribution <span
-                                style="font-weight: 400; font-size: 0.8rem; color: var(--text-muted);">(Today)</span>
-                        </h3>
+                        <h3>
+    <i class="fa-solid fa-chart-pie"></i>
+    Financial Overview
+</h3>
                     </div>
-                    <div
-                        style="height: 200px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); border: 2px dashed var(--border-color); border-radius: 10px;">
-                        Chart Placeholder
-                    </div>
+                   <div style="height:300px; position:relative;">
+    <canvas id="financePieChart"></canvas>
+               </div>
                 </div>
 
                 <div class="card">
@@ -234,6 +222,9 @@
             </div>
         </div>
     </main>
+
+
+
 
     <script src="js/dashboard.js"></script>
 </body>

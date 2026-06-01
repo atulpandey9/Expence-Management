@@ -1,5 +1,6 @@
 // Dashboard logic
 const API_BASE = 'http://localhost:5000/api';
+let financePieChart = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Dashboard initialized');
@@ -74,11 +75,12 @@ async function refreshDashboard() {
         renderRecentIncome(incomes.slice(0, 5));
         renderRecentExpenses(expenses.slice(0, 5));
         renderRecentTransactions(stats.recentTransactions);
-
+renderFinancePieChart(stats);
     } catch (err) {
         console.error('Error refreshing dashboard data:', err);
     }
 }
+
 
 // Render recent incomes list on dashboard
 function renderRecentIncome(incomes) {
@@ -239,6 +241,7 @@ function renderRecentTransactions(transactions) {
     });
     html += '</ul>';
     container.innerHTML = html;
+    
 }
 
 // Render dynamic categories breakdown
@@ -264,4 +267,63 @@ function renderSpendingByCategory(spendingMap) {
     });
     html += '</div>';
     container.innerHTML = html;
+}
+
+//pie chart//
+function renderFinancePieChart(stats) {
+    const canvas = document.getElementById('financePieChart');
+
+    if (!canvas) return;
+
+    const income = stats.totalIncome || 0;
+    const expenses = stats.totalExpenses || 0;
+    const savings = Math.max(income - expenses, 0);
+
+    const ctx = canvas.getContext('2d');
+
+    if (financePieChart) {
+        financePieChart.destroy();
+    }
+
+    financePieChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Income', 'Expenses', 'Savings'],
+            datasets: [{
+                data: [income, expenses, savings],
+                backgroundColor: [
+                    '#10b981', // Green
+                    '#f97316', // Orange
+                    '#3b82f6'  // Blue
+                ],
+                borderWidth: 0,
+                hoverOffset: 12
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        font: {
+                            size: 13
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.label}: $${context.raw.toLocaleString()}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
 }
