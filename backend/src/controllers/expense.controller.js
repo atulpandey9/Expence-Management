@@ -1,4 +1,4 @@
-const Expense = require('../models/expencemodel');
+const Expense = require('../models/expence.model.js');
 
 // @desc    Add a new expense
 // @route   POST /api/expenses

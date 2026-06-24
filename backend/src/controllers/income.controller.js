@@ -1,4 +1,4 @@
-const Income = require('../models/incomemodel');
+const Income = require('../models/income.model.js');
 
 // @desc    Add a new income
 // @route   POST /api/incomes

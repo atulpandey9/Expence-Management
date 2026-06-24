@@ -1,5 +1,5 @@
-const Income = require('../models/incomemodel');
-const Expense = require('../models/expencemodel');
+const Income = require('../models/income.model.js');
+const Expense = require('../models/expence.model.js');
 
 // @desc    Get dashboard summary stats
 // @route   GET /api/stats/summary
