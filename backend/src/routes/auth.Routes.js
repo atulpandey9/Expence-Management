@@ -4,5 +4,6 @@ const authrouter=Router();
 
 
 authrouter.post('/register',authcontroller.registeruserController);
+authrouter.post('/login',authcontroller.loginuserController)
 
 module.exports=authrouter;
