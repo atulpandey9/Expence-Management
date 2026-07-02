@@ -28,6 +28,7 @@ const addIncome = async (req, res) => {
 // @desc    Get all incomes
 // @route   GET /api/incomes
 // @access  Public
+
 const getIncomes = async (req, res) => {
     try {
         const incomes = await Income.find().sort({ date: -1 });

@@ -4,6 +4,7 @@ const Expense = require('../models/expence.model.js');
 // @desc    Get dashboard summary stats
 // @route   GET /api/stats/summary
 // @access  Public
+
 const getSummary = async (req, res) => {
     try {
         const incomes = await Income.find();
