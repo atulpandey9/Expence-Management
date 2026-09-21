@@ -2,6 +2,7 @@ const mongoose=require('mongoose')
 const jwt=require('jsonwebtoken');
 const bcrypt=require('bcryptjs');
 const usermodel=require('../models/user.model.js');
+const tokenBlackListModel=require('../models/blacklist.model.js');
 
 async function registeruserController(req,res) {
     const{username,email,password}=req.body;
@@ -42,11 +43,12 @@ res.cookie("token",token);
 
 res.status(201).json({
     message:"user created successfully",
-      user: {
-            id: user._id,
-            username: user.username,
-            email: user.email
-        }
+    user: {
+        id: user._id,
+        username: user.username,
+        email: user.email
+    },
+    token: token
 })
 }
 
@@ -92,13 +94,15 @@ async function loginuserController(req,res) {
 }
 
 async function logoutUserController(req,res) {
-    const token=req.cookies.token
+    const token = req.cookies?.token || (req.headers.authorization?.startsWith("Bearer ") ? req.headers.authorization.split(" ")[1] : req.headers.authorization);
 
     if(token){
-await tokenBlackListModel.create({token})
+        await tokenBlackListModel.create({token});
     }
 
-    res.clearCookie("token")
+    if (res.clearCookie) {
+        res.clearCookie("token");
+    }
 
     res.status(200).json({
         message:"user logged out successfully"
@@ -106,7 +110,7 @@ await tokenBlackListModel.create({token})
 }
 
 async function getMeController(req,res){
-    const user=await userModel.findById(req.user.id)
+    const user=await usermodel.findById(req.user.id)
 
 
     res.status(200).json({

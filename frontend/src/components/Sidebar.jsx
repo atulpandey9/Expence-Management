@@ -1,6 +1,13 @@
 import React from 'react';
+import { useAuth } from '../auth/context/AuthContext';
 
 const Sidebar = ({ activeTab, setActiveTab }) => {
+  const { user, logout } = useAuth();
+
+  const username = user?.username || 'User';
+  const email = user?.email || '';
+  const initial = (username[0] || 'U').toUpperCase();
+
   return (
     <aside className="w-16 md:w-60 bg-white border-r border-[#e2e8f0] flex flex-col p-4 md:p-6 fixed h-screen left-0 top-0 transition-all duration-300 z-10">
       {/* Logo Section */}
@@ -13,12 +20,16 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
 
       {/* User Mini Profile */}
       <div className="flex items-center gap-2.5 p-2 bg-[#f3f6f9] rounded-xl mb-8 justify-center md:justify-start overflow-hidden">
-        <div className="w-8 h-8 min-w-[32px] bg-[#00bfae] text-white rounded-full flex items-center justify-center font-bold text-sm">
-          A
+        <div className="w-8 h-8 min-w-[32px] bg-[#00bfae] text-white rounded-full flex items-center justify-center font-bold text-sm shadow-sm">
+          {initial}
         </div>
         <div className="hidden md:block text-left truncate">
-          <p className="text-xs font-semibold text-[#334155] leading-tight">ap</p>
-          <p className="text-[10px] text-[#64748b] truncate leading-tight">ap@gmail.com</p>
+          <p className="text-xs font-semibold text-[#334155] leading-tight capitalize truncate">
+            {username}
+          </p>
+          <p className="text-[10px] text-[#64748b] truncate leading-tight">
+            {email}
+          </p>
         </div>
       </div>
 
@@ -27,7 +38,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
         <li>
           <button
             onClick={() => setActiveTab('dashboard')}
-            className={`w-full flex items-center justify-center md:justify-start gap-3 p-3 text-sm font-medium rounded-xl transition-all duration-200 ${
+            className={`w-full flex items-center justify-center md:justify-start gap-3 p-3 text-sm font-medium rounded-xl transition-all duration-200 cursor-pointer ${
               activeTab === 'dashboard'
                 ? 'bg-[#e6f9f7] text-[#00bfae]'
                 : 'text-[#64748b] hover:bg-[#e6f9f7] hover:text-[#00bfae]'
@@ -40,7 +51,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
         <li>
           <button
             onClick={() => setActiveTab('income')}
-            className={`w-full flex items-center justify-center md:justify-start gap-3 p-3 text-sm font-medium rounded-xl transition-all duration-200 ${
+            className={`w-full flex items-center justify-center md:justify-start gap-3 p-3 text-sm font-medium rounded-xl transition-all duration-200 cursor-pointer ${
               activeTab === 'income'
                 ? 'bg-[#e6f9f7] text-[#00bfae]'
                 : 'text-[#64748b] hover:bg-[#e6f9f7] hover:text-[#00bfae]'
@@ -53,7 +64,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
         <li>
           <button
             onClick={() => setActiveTab('expense')}
-            className={`w-full flex items-center justify-center md:justify-start gap-3 p-3 text-sm font-medium rounded-xl transition-all duration-200 ${
+            className={`w-full flex items-center justify-center md:justify-start gap-3 p-3 text-sm font-medium rounded-xl transition-all duration-200 cursor-pointer ${
               activeTab === 'expense'
                 ? 'bg-[#e6f9f7] text-[#00bfae]'
                 : 'text-[#64748b] hover:bg-[#e6f9f7] hover:text-[#00bfae]'
@@ -65,10 +76,18 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
         </li>
       </nav>
 
-      {/* Footer */}
-      <div className="border-t border-[#e2e8f0] pt-4 mt-auto hidden md:block">
-        <p className="text-[10px] text-[#64748b] text-center">
-          Expensely © 2026
+      {/* Logout & Footer */}
+      <div className="border-t border-[#e2e8f0] pt-4 mt-auto flex flex-col gap-2">
+        <button
+          onClick={logout}
+          className="w-full flex items-center justify-center md:justify-start gap-3 p-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 cursor-pointer group"
+          title="Sign out"
+        >
+          <i className="fa-solid fa-arrow-right-from-bracket text-base w-5 text-center group-hover:-translate-x-0.5 transition-transform"></i>
+          <span className="hidden md:inline">Sign Out</span>
+        </button>
+        <p className="text-[10px] text-[#94a3b8] text-center hidden md:block">
+          Expense Tracker © 2026
         </p>
       </div>
     </aside>
