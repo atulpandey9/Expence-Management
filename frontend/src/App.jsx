@@ -1,14 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import StatsSummary from './components/StatsSummary';
 import DashboardView from './components/DashboardView';
 import IncomeView from './components/IncomeView';
 import ExpenseView from './components/ExpenseView';
+import Login from './auth/pages/Login';
+import Register from './auth/pages/Register';
+import ProtectedRoute from './auth/components/ProtectedRoute';
+import { useAuth } from './auth/context/AuthContext';
 
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = 'http://localhost:5000/api';
 
-function App() {
+function DashboardLayout() {
+  const { token } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [incomes, setIncomes] = useState([]);
   const [expenses, setExpenses] = useState([]);
@@ -24,54 +30,65 @@ function App() {
     todaySavings: 0,
     recentTransactions: [],
     spendingByCategory: {},
-    incomeByCategory: {}
+    incomeByCategory: {},
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const refreshData = async () => {
+  const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+
+  const refreshData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
       // Fetch summary stats
-      const statsRes = await fetch(`${API_BASE}/stats/summary`);
+      const statsRes = await fetch(`${API_BASE}/stats/summary`, {
+        headers: authHeaders,
+      });
       if (!statsRes.ok) throw new Error('Failed to fetch dashboard stats.');
       const statsData = await statsRes.json();
       setStats(statsData);
 
       // Fetch incomes
-      const incomesRes = await fetch(`${API_BASE}/incomes`);
+      const incomesRes = await fetch(`${API_BASE}/incomes`, {
+        headers: authHeaders,
+      });
       if (!incomesRes.ok) throw new Error('Failed to fetch income list.');
       const incomesData = await incomesRes.json();
       setIncomes(incomesData);
 
       // Fetch expenses
-      const expensesRes = await fetch(`${API_BASE}/expenses`);
+      const expensesRes = await fetch(`${API_BASE}/expenses`, {
+        headers: authHeaders,
+      });
       if (!expensesRes.ok) throw new Error('Failed to fetch expenses list.');
       const expensesData = await expensesRes.json();
       setExpenses(expensesData);
-
     } catch (err) {
       console.error('Error fetching data:', err);
-      setError(err.message || 'Server connection error. Please make sure the backend server is running.');
+      setError(
+        err.message ||
+          'Server connection error. Please make sure the backend server is running.'
+      );
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     refreshData();
-  }, []);
+  }, [refreshData]);
 
   const handleAddIncome = async (data) => {
     try {
       const res = await fetch(`${API_BASE}/incomes`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...authHeaders,
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
       if (res.ok) {
         await refreshData();
@@ -91,7 +108,8 @@ function App() {
   const handleDeleteIncome = async (id) => {
     try {
       const res = await fetch(`${API_BASE}/incomes/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: authHeaders,
       });
       if (res.ok) {
         await refreshData();
@@ -109,9 +127,10 @@ function App() {
       const res = await fetch(`${API_BASE}/expenses`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...authHeaders,
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
       if (res.ok) {
         await refreshData();
@@ -131,7 +150,8 @@ function App() {
   const handleDeleteExpense = async (id) => {
     try {
       const res = await fetch(`${API_BASE}/expenses/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: authHeaders,
       });
       if (res.ok) {
         await refreshData();
@@ -188,7 +208,7 @@ function App() {
       {/* Main Content Area */}
       <main className="ml-16 md:ml-60 flex-grow p-4 md:p-8 min-h-screen transition-all duration-300">
         <Header activeTab={activeTab} />
-        
+
         {loading && incomes.length === 0 && expenses.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#00bfae]"></div>
@@ -215,6 +235,23 @@ function App() {
         )}
       </main>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route
+        path="/*"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
   );
 }
 
