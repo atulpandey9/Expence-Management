@@ -1,4 +1,5 @@
 const Expense = require('../models/expence.model.js');
+const { deleteCache, CACHE_KEYS, deleteUserSummary } = require('../config/redis.js');
 
 // @desc    Add a new expense
 // @route   POST /api/expenses
@@ -16,9 +17,11 @@ const addExpense = async (req, res) => {
             amount,
             category,
             date,
+            user: req.user.id,
             type: 'expense'
         });
 
+        await deleteUserSummary(req.user.id);
         res.status(201).json(expense);
     } catch (error) {
         res.status(500).json({ message: 'Server Error', error: error.message });
@@ -49,6 +52,8 @@ const deleteExpense = async (req, res) => {
         }
 
         await expense.deleteOne();
+
+        await deleteUserSummary(req.user.id);
         res.status(200).json({ message: 'Expense removed' });
     } catch (error) {
         res.status(500).json({ message: 'Server Error', error: error.message });

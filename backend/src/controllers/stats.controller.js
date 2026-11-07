@@ -1,5 +1,8 @@
 const Income = require('../models/income.model.js');
 const Expense = require('../models/expence.model.js');
+const { getCache, setCache, CACHE_KEYS } = require('../config/redis.js');
+
+const SUMMARY_CACHE_TTL = 60; // seconds
 
 // @desc    Get dashboard summary stats
 // @route   GET /api/stats/summary
@@ -7,6 +10,12 @@ const Expense = require('../models/expence.model.js');
 
 const getSummary = async (req, res) => {
     try {
+        // Return the cached summary for this user when available
+        const cachedSummary = await getCache(CACHE_KEYS.SUMMARY(req.user.id));
+        if (cachedSummary) {
+            return res.status(200).json(cachedSummary);
+        }
+
         const incomes = await Income.find();
         const expenses = await Expense.find();
 
@@ -15,22 +24,33 @@ const getSummary = async (req, res) => {
         const totalBalance = totalIncome - totalExpenses;
 
         // Monthly stats calculation
+        // Transactions are stored as UTC midnight, so group by the UTC year/month.
         const now = new Date();
-        const currentYear = now.getFullYear();
-        const currentMonth = now.getMonth(); // 0-indexed
+        const getMonthKey = (value) => {
+            const d = new Date(value);
+            return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+        };
 
-        const monthlyIncomesList = incomes.filter(item => {
-            const d = new Date(item.date);
-            return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
-        });
+        // Prefer the current calendar month, but fall back to the most recent
+        // month that has activity so the monthly cards are not empty forever.
+        const currentMonthKey = getMonthKey(now);
+        const monthKeys = [...incomes, ...expenses]
+            .map(item => getMonthKey(item.date)).sort();
+        const latestMonthKey = monthKeys.length > 0 ? monthKeys[monthKeys.length - 1] : null;
+        const statsMonthKey = monthKeys.includes(currentMonthKey)
+            ? currentMonthKey
+            : (latestMonthKey || currentMonthKey);
 
-        const monthlyExpensesList = expenses.filter(item => {
-            const d = new Date(item.date);
-            return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
-        });
+        const monthlyIncomesList = incomes.filter(item => getMonthKey(item.date) === statsMonthKey);
+        const monthlyExpensesList = expenses.filter(item => getMonthKey(item.date) === statsMonthKey);
 
         const monthlyIncome = monthlyIncomesList.reduce((acc, item) => acc + item.amount, 0);
         const monthlyExpenses = monthlyExpensesList.reduce((acc, item) => acc + item.amount, 0);
+        const monthlySavings = monthlyIncome - monthlyExpenses;
+
+        const [statsYear, statsMonth] = statsMonthKey.split('-').map(Number);
+        const monthLabel = new Date(Date.UTC(statsYear, statsMonth - 1, 1))
+            .toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 
         let savingsRate = 0;
         if (monthlyIncome > 0) {
@@ -96,12 +116,14 @@ const getSummary = async (req, res) => {
             }
         });
 
-        res.status(200).json({
+        const summary = {
             totalBalance,
             totalIncome,
             totalExpenses,
             monthlyIncome,
             monthlyExpenses,
+            monthlySavings,
+            monthLabel,
             savingsRate,
             todayExpenses,
             todayIncome,
@@ -109,7 +131,12 @@ const getSummary = async (req, res) => {
             recentTransactions: combinedTransactions,
             spendingByCategory,
             incomeByCategory
-        });
+        };
+
+        // Cache the computed result per-user for the next request
+        await setCache(CACHE_KEYS.SUMMARY(req.user.id), summary, SUMMARY_CACHE_TTL);
+
+        res.status(200).json(summary);
     } catch (error) {
         res.status(500).json({ message: 'Server Error', error: error.message });
     }

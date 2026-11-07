@@ -79,6 +79,10 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.message || 'Registration failed.');
       }
 
+      // Clear stale session data from the previous account so the new one is used.
+      localStorage.removeItem('expense_token');
+      localStorage.removeItem('expense_user');
+
       // If token is returned, log in immediately
       if (data.token && data.user) {
         setToken(data.token);
