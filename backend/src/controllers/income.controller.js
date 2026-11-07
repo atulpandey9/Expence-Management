@@ -1,4 +1,5 @@
 const Income = require('../models/income.model.js');
+const { deleteCache, CACHE_KEYS, deleteUserSummary } = require('../config/redis.js');
 
 // @desc    Add a new income
 // @route   POST /api/incomes
@@ -19,6 +20,7 @@ const addIncome = async (req, res) => {
             type: 'income'
         });
 
+        await deleteUserSummary(req.user.id);
         res.status(201).json(income);
     } catch (error) {
         res.status(500).json({ message: 'Server Error', error: error.message });
@@ -50,6 +52,8 @@ const deleteIncome = async (req, res) => {
         }
 
         await income.deleteOne();
+
+        await deleteUserSummary(req.user.id);
         res.status(200).json({ message: 'Income removed' });
     } catch (error) {
         res.status(500).json({ message: 'Server Error', error: error.message });

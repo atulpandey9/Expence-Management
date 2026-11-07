@@ -5,6 +5,7 @@ const StatsSummary = ({ stats = {} }) => {
   const monthlyIncome = stats.monthlyIncome || 0;
   const monthlyExpenses = stats.monthlyExpenses || 0;
   const savingsRate = stats.savingsRate || 0;
+  const monthLabel = stats.monthLabel || 'This month';
 
   const getSavingsRateStyles = (rate) => {
     if (rate >= 50) {
@@ -26,7 +27,7 @@ const StatsSummary = ({ stats = {} }) => {
           <h3 className="text-xs font-semibold text-[#64748b] mb-2 uppercase tracking-wider">Total Balance</h3>
           <p className="text-2xl font-bold text-[#334155]">${totalBalance.toLocaleString()}</p>
           <p className="text-[10px] text-[#64748b] mt-1.5 font-medium">
-            +0.0% <span className="text-[#94a3b8]">this month</span>
+            <span className="text-[#94a3b8]">Across all transactions</span>
           </p>
         </div>
         <div className="w-10 h-10 rounded-lg bg-[#e0f2fe] text-[#0ea5e9] flex items-center justify-center text-lg">
@@ -40,7 +41,7 @@ const StatsSummary = ({ stats = {} }) => {
           <h3 className="text-xs font-semibold text-[#64748b] mb-2 uppercase tracking-wider">Monthly Income</h3>
           <p className="text-2xl font-bold text-[#334155]">${monthlyIncome.toLocaleString()}</p>
           <p className="text-[10px] text-[#10b981] mt-1.5 font-medium">
-            +12.5% <span className="text-[#94a3b8]">from last month</span>
+            <span className="text-[#94a3b8]">{monthLabel}</span>
           </p>
         </div>
         <div className="w-10 h-10 rounded-lg bg-[#dcfce7] text-[#22c55e] flex items-center justify-center text-lg">
@@ -54,7 +55,7 @@ const StatsSummary = ({ stats = {} }) => {
           <h3 className="text-xs font-semibold text-[#64748b] mb-2 uppercase tracking-wider">Monthly Expenses</h3>
           <p className="text-2xl font-bold text-[#334155]">${monthlyExpenses.toLocaleString()}</p>
           <p className="text-[10px] text-[#f59e0b] mt-1.5 font-medium">
-            -0% <span className="text-[#94a3b8]">from last month</span>
+            <span className="text-[#94a3b8]">{monthLabel}</span>
           </p>
         </div>
         <div className="w-10 h-10 rounded-lg bg-[#ffedd5] text-[#f97316] flex items-center justify-center text-lg">
